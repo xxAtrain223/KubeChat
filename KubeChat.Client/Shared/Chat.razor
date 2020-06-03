@@ -1,0 +1,160 @@
+﻿<div id="scrollbox">
+
+    @foreach (var item in messages)
+    {
+        <div class="card mb-3 text-white @item.CSS">
+            <div class="card-header p-1 clearfix">
+                <span>@item.Username</span>
+                <span class="text-white-50 float-right">@item.Time</span>
+                @if (item.WaitingConfirmation)
+                {
+                    <div class="spinner-grow spinner-grow-sm text-light float-right" role="status">
+                        <span class="sr-only">Loading...</span>
+                    </div>
+                }
+            </div>
+            <div class="card-body p-1">@item.Body</div>
+        </div>
+    }
+    <hr />
+    <div class="input-group">
+        <input class="form-control" @bind="@newMessage" @onkeypress="InputKeyPress" />
+        <div class="input-group-append">
+            <button class="col btn btn-primary" @onclick="@SendAsync">Send</button>
+        </div>
+    </div>
+</div>
+
+@using Microsoft.AspNetCore.SignalR.Client;
+
+@code {
+    [Parameter]
+    public string SiteUrl { get; set; }
+
+    [Parameter]
+    public string HubPath { get; set; } = "/ChatHub";
+
+    [Parameter]
+    public string Username { get; set; }
+
+    [Parameter]
+    public string AccessToken { get; set; }
+
+    private List<Message> messages = new List<Message>();
+
+    private string newMessage;
+
+    private HubConnection hubConnection = null;
+
+    public async Task Connect()
+    {
+        if (hubConnection != null)
+        {
+            await Disconnect();
+        }
+
+        hubConnection = new HubConnectionBuilder()
+            .WithUrl($"{SiteUrl.TrimEnd('/')}{HubPath}", options =>
+            {
+                options.AccessTokenProvider = () => Task.FromResult(AccessToken);
+            })
+            .Build();
+
+        hubConnection.On<string, string>("ReceiveMessage", ReceiveMessage);
+
+        hubConnection.On<Guid>("MessageConfirmation", ConfirmMessage);
+
+        await hubConnection.StartAsync();
+
+        await hubConnection.SendAsync("Register", Username);
+    }
+
+    public async Task Disconnect()
+    {
+        if (hubConnection == null)
+        {
+            return;
+        }
+
+        await hubConnection.StopAsync();
+        await hubConnection.DisposeAsync();
+
+        hubConnection = null;
+    }
+
+    private async Task InputKeyPress(KeyboardEventArgs args)
+    {
+        if (!args.ShiftKey && args.Key == "Enter")
+        {
+            await SendAsync();
+        }
+    }
+
+    private async Task SendAsync()
+    {
+        if (!string.IsNullOrWhiteSpace(newMessage))
+        {
+            var message = new Message
+            {
+                Guid = Guid.NewGuid(),
+                Username = Username,
+                Body = newMessage,
+                Mine = true,
+                WaitingConfirmation = true
+            };
+
+            messages.Add(message);
+
+            if (hubConnection != null)
+            {
+                await hubConnection?.SendAsync("SendMessage", message.Guid, newMessage);
+            }
+
+            newMessage = "";
+        }
+    }
+
+    private void ReceiveMessage(string username, string body)
+    {
+        messages.Add(new Message
+        {
+            Username = username,
+            Body = body,
+            Mine = username == Username,
+            WaitingConfirmation = false
+        });
+    }
+
+    private void ConfirmMessage(Guid guid)
+    {
+        var message = messages
+            .Where(m =>
+                m.WaitingConfirmation == true &&
+                m.Guid == guid)
+            .SingleOrDefault();
+
+        if (message != null)
+        {
+            message.WaitingConfirmation = false;
+            message.Time = DateTime.Now;
+        }
+    }
+
+    private class Message
+    {
+        public string Username { get; set; }
+        public string Body { get; set; }
+        public bool Mine { get; set; }
+        public bool WaitingConfirmation { get; set; }
+        public Guid Guid { get; set; } = Guid.Empty;
+        public DateTime Time { get; set; } = DateTime.Now;
+
+        public string CSS
+        {
+            get
+            {
+                return Mine ? "bg-success" : "bg-primary";
+            }
+        }
+    }
+}

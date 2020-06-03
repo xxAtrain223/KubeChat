@@ -1,5 +1,7 @@
 ﻿@page "/"
 
-<h1>Hello, world!</h1>
+<Chat Username="xxAtrain223" @ref="chat"></Chat>
 
-Welcome to your new app.
+@code {
+    private Chat chat { get; set; }
+}
