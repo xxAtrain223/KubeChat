@@ -111,6 +111,8 @@
             }
 
             newMessage = "";
+
+            StateHasChanged();
         }
     }
 
@@ -120,9 +122,11 @@
         {
             Username = username,
             Body = body,
-            Mine = username == Username,
+            Mine = false,
             WaitingConfirmation = false
         });
+
+        StateHasChanged();
     }
 
     private void ConfirmMessage(Guid guid)
@@ -138,6 +142,8 @@
             message.WaitingConfirmation = false;
             message.Time = DateTime.Now;
         }
+
+        StateHasChanged();
     }
 
     private class Message

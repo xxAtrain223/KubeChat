@@ -4,6 +4,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 16.0.30114.105
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KubeChat.Client", "KubeChat.Client\KubeChat.Client.csproj", "{913B4FB9-F339-4F3C-A457-EC75A0A92223}"
+	ProjectSection(ProjectDependencies) = postProject
+		{0D1264C0-7FAE-46CF-894C-CBC23D102801} = {0D1264C0-7FAE-46CF-894C-CBC23D102801}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KubeChat.Server", "KubeChat.Server\KubeChat.Server.csproj", "{0D1264C0-7FAE-46CF-894C-CBC23D102801}"
 EndProject

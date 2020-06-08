@@ -1,7 +1,14 @@
 ﻿@page "/"
 
-<Chat Username="xxAtrain223" @ref="chat"></Chat>
+<Chat SiteUrl="https://localhost:5003" Username="@(new Random().Next(100).ToString())" @ref="chat"></Chat>
 
 @code {
     private Chat chat { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await chat.Connect();
+
+        await base.OnAfterRenderAsync(firstRender);
+    }
 }
