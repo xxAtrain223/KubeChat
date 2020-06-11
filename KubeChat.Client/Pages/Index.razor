@@ -1,6 +1,6 @@
 ﻿@page "/"
 
-<Chat SiteUrl="https://localhost:5003" Username="@(new Random().Next(100).ToString())" @ref="chat"></Chat>
+<Chat SiteUrl="http://localhost:5002" Username="@(new Random().Next(100).ToString())" @ref="chat"></Chat>
 
 @code {
     private Chat chat { get; set; }

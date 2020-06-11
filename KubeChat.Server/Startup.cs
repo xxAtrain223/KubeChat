@@ -42,7 +42,7 @@ namespace KubeChat.Server
 
             app.UseCors(builder =>
             {
-                builder.WithOrigins("https://localhost:5001")
+                builder.WithOrigins("http://localhost:5000")
                     .AllowAnyHeader()
                     .WithMethods("GET", "POST")
                     .AllowCredentials();

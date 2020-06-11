@@ -10,7 +10,7 @@ namespace KubeChat.Server.Hubs
     public class ChatHub : Hub
     {
         private static readonly Dictionary<string, string> Usernames = new Dictionary<string, string>();
-        private ILogger<ChatHub> logger;
+        private readonly ILogger<ChatHub> logger;
 
         public ChatHub(ILogger<ChatHub> logger)
         {
