@@ -48,7 +48,6 @@ namespace KubeChat.Server
                     .AllowCredentials();
             });
 
-            app.UseHttpsRedirection();
             app.UseStaticFiles();
 
             app.UseRouting();

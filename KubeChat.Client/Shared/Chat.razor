@@ -13,12 +13,12 @@
                     </div>
                 }
             </div>
-            <div class="card-body p-1">@item.Body</div>
+            <div class="card-body p-1">@((MarkupString)item.Body.Replace("\n", "<br />"))</div>
         </div>
     }
     <hr />
     <div class="input-group">
-        <input class="form-control" @bind="@newMessage" @onkeypress="InputKeyPress" />
+        <input class="form-control" @bind="newMessage" @onkeyup="InputKeyPress" />
         <div class="input-group-append">
             <button class="col btn btn-primary" @onclick="@SendAsync">Send</button>
         </div>
@@ -54,6 +54,7 @@
         }
 
         hubConnection = new HubConnectionBuilder()
+            .WithAutomaticReconnect()
             .WithUrl($"{SiteUrl.TrimEnd('/')}{HubPath}", options =>
             {
                 options.AccessTokenProvider = () => Task.FromResult(AccessToken);
@@ -63,6 +64,42 @@
         hubConnection.On<string, string>("ReceiveMessage", ReceiveMessage);
 
         hubConnection.On<Guid>("MessageConfirmation", ConfirmMessage);
+
+        hubConnection.Closed += (Exception e) =>
+        {
+            messages.Add(new Message
+            {
+                Username = "KubeChat",
+                Body = $"Connection closed\n{e.Message}",
+                Mine = true
+            });
+            StateHasChanged();
+            return Task.CompletedTask;
+        };
+
+        hubConnection.Reconnecting += (Exception e) =>
+        {
+            messages.Add(new Message
+            {
+                Username = "KubeChat",
+                Body = $"Reconnecting\n{e.Message}",
+                Mine = true
+            });
+            StateHasChanged();
+            return Task.CompletedTask;
+        };
+
+        hubConnection.Reconnected += (string s) =>
+        {
+            messages.Add(new Message
+            {
+                Username = "KubeChat",
+                Body = $"Reconnected\n{s}",
+                Mine = true
+            });
+            StateHasChanged();
+            return Task.CompletedTask;
+        };
 
         await hubConnection.StartAsync();
 

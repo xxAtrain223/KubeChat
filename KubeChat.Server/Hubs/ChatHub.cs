@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Web;
 
 namespace KubeChat.Server.Hubs
 {
@@ -34,7 +35,7 @@ namespace KubeChat.Server.Hubs
             var currentId = Context.ConnectionId;
             if (Usernames.ContainsKey(currentId))
             {
-                await Clients.AllExcept(currentId).SendAsync("ReceiveMessage", Usernames[currentId], message);
+                await Clients.AllExcept(currentId).SendAsync("ReceiveMessage", Usernames[currentId], HttpUtility.HtmlEncode(message));
                 await Clients.Caller.SendAsync("MessageConfirmation", messageGuid);
                 logger.LogInformation($"{Usernames[currentId]}: {message}");
             }
