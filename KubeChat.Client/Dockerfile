@@ -1,14 +1,21 @@
-﻿FROM mcr.microsoft.com/dotnet/core/sdk:3.1-buster AS build
+#See https://aka.ms/containerfastmode to understand how Visual Studio uses this Dockerfile to build your images for faster debugging.
+
+FROM mcr.microsoft.com/dotnet/core/aspnet:3.1-buster-slim AS base
+WORKDIR /app
+EXPOSE 80
+
+FROM mcr.microsoft.com/dotnet/core/sdk:3.1-buster AS build
 WORKDIR /src
-COPY KubeChat.Client.csproj .
-RUN dotnet restore "KubeChat.Client.csproj"
+COPY ["KubeChat.Client/KubeChat.Client.csproj", "KubeChat.Client/"]
+RUN dotnet restore "KubeChat.Client/KubeChat.Client.csproj"
 COPY . .
+WORKDIR "/src/KubeChat.Client"
 RUN dotnet build "KubeChat.Client.csproj" -c Release -o /app/build
 
 FROM build AS publish
 RUN dotnet publish "KubeChat.Client.csproj" -c Release -o /app/publish
 
-FROM nginx:alpine AS final
-WORKDIR /usr/share/nginx/html
-COPY --from=publish /app/publish/wwwroot .
-COPY nginx.conf /etc/nginx/nginx.conf
+FROM base AS final
+WORKDIR /app
+COPY --from=publish /app/publish .
+ENTRYPOINT ["dotnet", "KubeChat.Client.dll"]
