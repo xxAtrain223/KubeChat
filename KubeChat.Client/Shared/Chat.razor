@@ -29,17 +29,17 @@
 @using Microsoft.AspNetCore.SignalR.Client;
 
 @code {
-        [Parameter]
-        public string SiteUrl { get; set; }
+    [Parameter]
+    public string SiteUrl { get; set; }
 
-        [Parameter]
-        public string HubPath { get; set; } = "/ChatHub";
+    [Parameter]
+    public string HubPath { get; set; } = "/ChatHub";
 
-        [Parameter]
-        public string Username { get; set; }
+    [Parameter]
+    public string Username { get; set; }
 
-        [Parameter]
-        public string AccessToken { get; set; }
+    [Parameter]
+    public string AccessToken { get; set; }
 
     private List<Message> messages = new List<Message>();
 
@@ -74,7 +74,7 @@
                 Body = $"Connection closed\n{e.Message}",
                 Mine = true
             });
-            StateHasChanged();
+            InvokeAsync(StateHasChanged);
             return Task.CompletedTask;
         };
 
@@ -86,7 +86,7 @@
                 Body = $"Reconnecting\n{e.Message}",
                 Mine = true
             });
-            StateHasChanged();
+            InvokeAsync(StateHasChanged);
             return Task.CompletedTask;
         };
 
@@ -98,18 +98,32 @@
                 Body = $"Reconnected\n{s}",
                 Mine = true
             });
-            StateHasChanged();
+            InvokeAsync(StateHasChanged);
             return Task.CompletedTask;
         };
 
-        await hubConnection.StartAsync();
+        try
+        {
+            await hubConnection.StartAsync();
 
-        await hubConnection.SendAsync("Register", Username);
+            await hubConnection.SendAsync("Register", Username);
+        }
+        catch (Exception e)
+        {
+            messages.Add(new Message
+            {
+                Username = "KubeChat",
+                Body = $"Failed to connect.\n{e.Message}",
+                Mine = true
+            });
+            StateHasChanged();
+            hubConnection = null;
+        }
     }
 
     public async Task Disconnect()
     {
-        if (hubConnection == null || hubConnection.State == HubConnectionState.Disconnected)
+        if (hubConnection == null)
         {
             return;
         }
@@ -154,14 +168,19 @@
 
             messages.Add(message);
 
-            if (hubConnection != null)
-            {
-                await hubConnection?.SendAsync("SendMessage", message.Guid, newMessage);
-            }
-
             newMessage = "";
 
             StateHasChanged();
+
+            if (hubConnection == null || hubConnection.State == HubConnectionState.Disconnected)
+            {
+                await Connect();
+            }
+
+            if (hubConnection != null && hubConnection.State == HubConnectionState.Connected)
+            {
+                await hubConnection.SendAsync("SendMessage", message.Guid, newMessage);
+            }
         }
     }
 
