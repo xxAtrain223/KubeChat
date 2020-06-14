@@ -25,20 +25,21 @@
     </div>
 </div>
 
+@implements IDisposable
 @using Microsoft.AspNetCore.SignalR.Client;
 
 @code {
-    [Parameter]
-    public string SiteUrl { get; set; }
+        [Parameter]
+        public string SiteUrl { get; set; }
 
-    [Parameter]
-    public string HubPath { get; set; } = "/ChatHub";
+        [Parameter]
+        public string HubPath { get; set; } = "/ChatHub";
 
-    [Parameter]
-    public string Username { get; set; }
+        [Parameter]
+        public string Username { get; set; }
 
-    [Parameter]
-    public string AccessToken { get; set; }
+        [Parameter]
+        public string AccessToken { get; set; }
 
     private List<Message> messages = new List<Message>();
 
@@ -108,15 +109,26 @@
 
     public async Task Disconnect()
     {
-        if (hubConnection == null)
+        if (hubConnection == null || hubConnection.State == HubConnectionState.Disconnected)
         {
             return;
         }
 
-        await hubConnection.StopAsync();
-        await hubConnection.DisposeAsync();
+        try
+        {
+            await hubConnection.StopAsync();
+        }
+        finally
+        {
+            await hubConnection.DisposeAsync();
+        }
 
         hubConnection = null;
+    }
+
+    public void Dispose()
+    {
+        Disconnect().Wait();
     }
 
     private async Task InputKeyPress(KeyboardEventArgs args)
