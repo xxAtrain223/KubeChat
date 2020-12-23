@@ -5,11 +5,11 @@ services:
     image: ${DOCKER_REGISTRY-}kubechatclient
     build:
       context: .
-      dockerfile: KubeChat.Client/Dockerfile
+      dockerfile: KubeChat.Client/Dockerfile.compose
 
   kubechat.server:
     image: ${DOCKER_REGISTRY-}kubechatserver
     build:
       context: .
-      dockerfile: KubeChat.Server/Dockerfile
+      dockerfile: KubeChat.Server/Dockerfile.compose
 

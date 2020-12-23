@@ -6,14 +6,14 @@ EXPOSE 80
 
 FROM mcr.microsoft.com/dotnet/sdk:5.0-alpine AS build
 WORKDIR /src
-COPY KubeChat.Client.csproj .
-RUN dotnet restore "KubeChat.Client.csproj"
+COPY ["KubeChat.Client/KubeChat.Client.csproj", "KubeChat.Client/"]
+RUN dotnet restore "KubeChat.Client/KubeChat.Client.csproj"
 COPY . .
-WORKDIR /src
-RUN dotnet build "KubeChat.Client.csproj" -c Release -o /app/build
+WORKDIR "/src/KubeChat.Client"
+RUN dotnet build "KubeChat.Client.csproj" -c Debug -o /app/build
 
 FROM build AS publish
-RUN dotnet publish "KubeChat.Client.csproj" -c Release -o /app/publish
+RUN dotnet publish "KubeChat.Client.csproj" -c Debug -o /app/publish
 
 FROM base AS final
 WORKDIR /app

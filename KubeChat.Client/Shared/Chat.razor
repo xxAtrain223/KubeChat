@@ -179,7 +179,7 @@
 
             if (hubConnection != null && hubConnection.State == HubConnectionState.Connected)
             {
-                await hubConnection.SendAsync("SendMessage", message.Guid, newMessage);
+                await hubConnection.SendAsync("SendMessage", message.Guid, message.Body);
             }
         }
     }
