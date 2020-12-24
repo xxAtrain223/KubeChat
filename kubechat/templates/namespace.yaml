@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: kubechat
+  labels:
+    app.kubernetes.io/name: kubechat
+    app.kubernetes.io/instance: kubechat
