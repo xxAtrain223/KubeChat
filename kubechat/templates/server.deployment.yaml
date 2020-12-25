@@ -17,7 +17,6 @@ spec:
     spec:
       containers:
       - name: server
-        image: kubechatserver:0.1.0
-        imagePullPolicy: Never
+        image: xxatrain223/kubechatserver:0.1.0
         ports:
         - containerPort: 80

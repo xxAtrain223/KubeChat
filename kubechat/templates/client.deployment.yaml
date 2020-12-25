@@ -17,7 +17,6 @@ spec:
     spec:
       containers:
       - name: client
-        image: kubechatclient:0.1.0
-        imagePullPolicy: Never
+        image: xxatrain223/kubechatclient:0.1.0
         ports:
         - containerPort: 80
