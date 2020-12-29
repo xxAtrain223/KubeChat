@@ -1,13 +1,13 @@
 version: '3.4'
 
 services:
-  kubechat.client:
+  client.kubechat.com:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
     ports:
       - "80"
 
-  kubechat.server:
+  server.kubechat.com:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:80

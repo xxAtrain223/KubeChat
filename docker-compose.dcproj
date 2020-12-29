@@ -6,7 +6,7 @@
     <ProjectGuid>4c76056a-d959-40b3-bdf1-e903b6e266b2</ProjectGuid>
     <DockerLaunchAction>LaunchBrowser</DockerLaunchAction>
     <DockerServiceUrl>{Scheme}://localhost:{ServicePort}</DockerServiceUrl>
-    <DockerServiceName>kubechat.client</DockerServiceName>
+    <DockerServiceName>client.kubechat.com</DockerServiceName>
   </PropertyGroup>
   <ItemGroup>
     <None Include="docker-compose.override.yml">

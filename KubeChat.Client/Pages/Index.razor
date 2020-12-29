@@ -1,6 +1,6 @@
 ﻿@page "/"
 
-<Chat SiteUrl="http://kubechat.server" Username="@(new Random().Next(100).ToString())" @ref="chat"></Chat>
+<Chat SiteUrl="http://server.kubechat.com" Username="@(new Random().Next(100).ToString())" @ref="chat"></Chat>
 
 @code {
     private Chat chat { get; set; }

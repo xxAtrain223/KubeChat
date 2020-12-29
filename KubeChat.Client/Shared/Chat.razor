@@ -1,5 +1,12 @@
 ﻿<div id="scrollbox">
-
+    @if (connecting)
+    {
+        <div class="card mb-3 text-white bg-warning">
+            <div class="card-body">
+                <h5 class="card-title mb-0">Connecting...</h5>
+            </div>
+        </div>
+    }
     @foreach (var item in messages)
     {
         <div class="card mb-3 text-white @item.CSS">
@@ -27,6 +34,7 @@
 
 @implements IDisposable
 @using Microsoft.AspNetCore.SignalR.Client;
+@using System.Threading; 
 
 @code {
     [Parameter]
@@ -46,6 +54,8 @@
     private string newMessage;
 
     private HubConnection hubConnection = null;
+
+    private bool connecting = false;
 
     public async Task Connect()
     {
@@ -72,7 +82,7 @@
             {
                 Username = "KubeChat",
                 Body = $"Connection closed\n{e.Message}",
-                Mine = true
+                CSS = "bg-info"
             });
             InvokeAsync(StateHasChanged);
             return Task.CompletedTask;
@@ -84,7 +94,7 @@
             {
                 Username = "KubeChat",
                 Body = $"Reconnecting\n{e.Message}",
-                Mine = true
+                CSS = "bg-info"
             });
             InvokeAsync(StateHasChanged);
             return Task.CompletedTask;
@@ -96,7 +106,7 @@
             {
                 Username = "KubeChat",
                 Body = $"Reconnected\n{s}",
-                Mine = true
+                CSS = "bg-info"
             });
             InvokeAsync(StateHasChanged);
             return Task.CompletedTask;
@@ -104,17 +114,24 @@
 
         try
         {
+            connecting = true;
+
+            new Thread(ConnectingMessageThread).Start();
             await hubConnection.StartAsync();
+
+            connecting = false;
+            StateHasChanged();
 
             await hubConnection.SendAsync("Register", Username);
         }
         catch (Exception e)
         {
+            connecting = false;
             messages.Add(new Message
             {
                 Username = "KubeChat",
                 Body = $"Failed to connect.\n{e.Message}",
-                Mine = true
+                CSS = "bg-danger"
             });
             StateHasChanged();
             hubConnection = null;
@@ -162,7 +179,7 @@
                 Guid = Guid.NewGuid(),
                 Username = Username,
                 Body = newMessage,
-                Mine = true,
+                CSS = "bg-success",
                 WaitingConfirmation = true
             };
 
@@ -190,7 +207,7 @@
         {
             Username = username,
             Body = body,
-            Mine = false,
+            CSS = "bg-primary",
             WaitingConfirmation = false
         });
 
@@ -214,21 +231,38 @@
         StateHasChanged();
     }
 
+    private void ConnectingMessageThread()
+    {
+        Thread.Sleep(3000);
+        int i = 3000;
+
+        while (connecting && i < 10000)
+        {
+            InvokeAsync(StateHasChanged);
+            Thread.Sleep(100);
+            i += 100;
+        }
+
+        if (connecting)
+        {
+            messages.Add(new Message
+            {
+                Username = "KubeChat",
+                Body = $"Timed out while connecting.",
+                CSS = "bg-danger"
+            });
+            connecting = false;
+            InvokeAsync(StateHasChanged);
+        }
+    }
+
     private class Message
     {
         public string Username { get; set; }
         public string Body { get; set; }
-        public bool Mine { get; set; }
         public bool WaitingConfirmation { get; set; }
         public Guid Guid { get; set; } = Guid.Empty;
         public DateTime Time { get; set; } = DateTime.Now;
-
-        public string CSS
-        {
-            get
-            {
-                return Mine ? "bg-success" : "bg-primary";
-            }
-        }
+        public string CSS { get; set; }
     }
 }
