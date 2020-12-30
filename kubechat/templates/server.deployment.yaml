@@ -17,6 +17,6 @@ spec:
     spec:
       containers:
       - name: server
-        image: xxatrain223/kubechatserver:0.1.0
+        image: xxatrain223/kubechatserver:0.1.1
         ports:
         - containerPort: 80

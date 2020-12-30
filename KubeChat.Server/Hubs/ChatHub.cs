@@ -25,7 +25,7 @@ namespace KubeChat.Server.Hubs
             {
                 Usernames.Add(currentId, username);
                 var message = $"{username} joined the chat.";
-                await Clients.AllExcept(currentId).SendAsync("ReceiveMessage", username, message);
+                await Clients.AllExcept(currentId).SendAsync("ReceiveMessage", "KubeChat", message);
                 logger.LogInformation(message);
             }
         }
@@ -50,7 +50,7 @@ namespace KubeChat.Server.Hubs
             }
 
             Usernames.Remove(currentId);
-            await Clients.AllExcept(currentId).SendAsync("ReceiveMessage", username, $"{username} has left the chat");
+            await Clients.AllExcept(currentId).SendAsync("ReceiveMessage", "KubeChat", $"{username} has left the chat.");
             logger.LogInformation($"{username} disconnected");
 
             await base.OnDisconnectedAsync(exception);

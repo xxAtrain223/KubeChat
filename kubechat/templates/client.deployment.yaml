@@ -6,7 +6,7 @@ metadata:
   labels:
     app: client
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: client
@@ -17,6 +17,6 @@ spec:
     spec:
       containers:
       - name: client
-        image: xxatrain223/kubechatclient:0.1.0
+        image: xxatrain223/kubechatclient:0.1.1
         ports:
         - containerPort: 80
