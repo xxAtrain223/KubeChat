@@ -15,7 +15,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
-    "KubeChat.Client": {
+    "KubeChat.Client.ServerSide": {
       "commandName": "Project",
       "launchBrowser": true,
       "environmentVariables": {

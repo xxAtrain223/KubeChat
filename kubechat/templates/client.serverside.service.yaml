@@ -1,11 +1,11 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: client-service
+  name: client-serverside-service
   namespace: kubechat
 spec:
   selector:
-    app: client
+    app: client-serverside
   ports:
     - protocol: TCP
       port: 80

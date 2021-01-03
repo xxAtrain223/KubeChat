@@ -9,7 +9,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-namespace KubeChat.Client
+namespace KubeChat.Client.ServerSide
 {
     public class Startup
     {

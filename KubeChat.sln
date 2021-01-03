@@ -5,9 +5,11 @@ VisualStudioVersion = 16.0.30114.105
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KubeChat.Server", "KubeChat.Server\KubeChat.Server.csproj", "{0D1264C0-7FAE-46CF-894C-CBC23D102801}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KubeChat.Client", "KubeChat.Client\KubeChat.Client.csproj", "{65CC4BFC-1DBA-4184-9549-F345C390FAB2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KubeChat.Client.ServerSide", "KubeChat.Client.ServerSide\KubeChat.Client.ServerSide.csproj", "{65CC4BFC-1DBA-4184-9549-F345C390FAB2}"
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{4C76056A-D959-40B3-BDF1-E903B6E266B2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KubeChat.Client.Common", "KubeChat.Client.Common\KubeChat.Client.Common.csproj", "{EF3FD179-8B92-4CDD-9AE3-D9E0F67F9E5D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,6 +29,10 @@ Global
 		{4C76056A-D959-40B3-BDF1-E903B6E266B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4C76056A-D959-40B3-BDF1-E903B6E266B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4C76056A-D959-40B3-BDF1-E903B6E266B2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EF3FD179-8B92-4CDD-9AE3-D9E0F67F9E5D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EF3FD179-8B92-4CDD-9AE3-D9E0F67F9E5D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EF3FD179-8B92-4CDD-9AE3-D9E0F67F9E5D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EF3FD179-8B92-4CDD-9AE3-D9E0F67F9E5D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

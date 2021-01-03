@@ -1,7 +1,7 @@
 version: '3.4'
 
 services:
-  client.kubechat.com:
+  serverside.client.kubechat.com:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
     ports:

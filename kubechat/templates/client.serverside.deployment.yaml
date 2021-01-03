@@ -1,22 +1,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: client-deployment
+  name: client-serverside-deployment
   namespace: kubechat
   labels:
-    app: client
+    app: client-serverside
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: client
+      app: client-serverside
   template:
     metadata:
       labels:
-        app: client
+        app: client-serverside
     spec:
       containers:
       - name: client
-        image: xxatrain223/kubechatclient:0.1.1
+        image: xxatrain223/kubechatclientserverside:0.1.2
         ports:
         - containerPort: 80

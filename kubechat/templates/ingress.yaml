@@ -7,14 +7,14 @@ metadata:
     nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
   rules:
-  - host: client.kubechat.com
+  - host: serverside.client.kubechat.com
     http:
       paths:
       - path: /
         pathType: Prefix
         backend:
           service:
-            name: client-service
+            name: client-serverside-service
             port:
               number: 80
   - host: server.kubechat.com
