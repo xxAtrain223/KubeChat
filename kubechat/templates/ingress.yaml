@@ -17,6 +17,16 @@ spec:
             name: client-serverside-service
             port:
               number: 80
+  - host: webassembly.client.kubechat.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: client-webassembly-service
+            port:
+              number: 80
   - host: server.kubechat.com
     http:
       paths:
@@ -27,3 +37,4 @@ spec:
             name: server-service
             port:
               number: 80
+

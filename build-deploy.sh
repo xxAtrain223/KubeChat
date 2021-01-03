@@ -16,6 +16,8 @@ add_file "kubechat/templates/server.deployment.yaml"
 add_file "kubechat/templates/server.service.yaml"
 add_file "kubechat/templates/client.serverside.deployment.yaml"
 add_file "kubechat/templates/client.serverside.service.yaml"
+add_file "kubechat/templates/client.webassembly.deployment.yaml"
+add_file "kubechat/templates/client.webassembly.service.yaml"
 add_file "kubechat/templates/ingress.yaml"
 
 echo "Generated" $file

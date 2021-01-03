@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: client-webassembly-deployment
+  namespace: kubechat
+  labels:
+    app: client-webassembly
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: client-webassembly
+  template:
+    metadata:
+      labels:
+        app: client-webassembly
+    spec:
+      containers:
+      - name: client
+        image: xxatrain223/kubechatclientwebassembly:0.1.2
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
