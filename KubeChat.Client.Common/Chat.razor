@@ -74,6 +74,8 @@
 
         hubConnection.On<string, string>("ReceiveMessage", ReceiveMessage);
 
+        hubConnection.On<string>("ReceiveInfo", ReceiveInfo);
+
         hubConnection.On<Guid>("MessageConfirmation", ConfirmMessage);
 
         hubConnection.Closed += (Exception e) =>
@@ -116,7 +118,8 @@
         {
             connecting = true;
 
-            new Thread(ConnectingMessageThread).Start();
+            // WebAssembly client can't run a seperate thread right now
+            //new Thread(ConnectingMessageThread).Start();
             await hubConnection.StartAsync();
 
             connecting = false;
@@ -208,6 +211,19 @@
             Username = username,
             Body = body,
             CSS = "bg-primary",
+            WaitingConfirmation = false
+        });
+
+        StateHasChanged();
+    }
+
+    private void ReceiveInfo(string body)
+    {
+        messages.Add(new Message
+        {
+            Username = "KubeChat",
+            Body = body,
+            CSS = "bg-info",
             WaitingConfirmation = false
         });
 

@@ -1,13 +1,13 @@
 version: '3.4'
 
 services:
-  serverside.client.kubechat.com:
+  client-serverside-service:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
     ports:
       - "80"
 
-  server.kubechat.com:
+  server-service:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:80

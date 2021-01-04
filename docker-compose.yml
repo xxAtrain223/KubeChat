@@ -1,15 +1,15 @@
 version: '3.4'
 
 services:
-  serverside.client.kubechat.com:
-    image: ${DOCKER_REGISTRY-}kubechatclientserverside
+  client-serverside-service:
+    image: ${DOCKER_REGISTRY-}kubechat-client-serverside
     build:
       context: .
-      dockerfile: KubeChat.Client.ServerSide/Dockerfile.compose
+      dockerfile: KubeChat.Client.ServerSide/Dockerfile
 
-  server.kubechat.com:
-    image: ${DOCKER_REGISTRY-}kubechatserver
+  server-service:
+    image: ${DOCKER_REGISTRY-}kubechat-server
     build:
       context: .
-      dockerfile: KubeChat.Server/Dockerfile.compose
+      dockerfile: KubeChat.Server/Dockerfile
 

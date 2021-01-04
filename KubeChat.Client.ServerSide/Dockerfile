@@ -5,18 +5,16 @@ WORKDIR /app
 EXPOSE 80
 
 FROM mcr.microsoft.com/dotnet/sdk:5.0-alpine AS build
-
 WORKDIR /src
-COPY KubeChat.Client.Common/ KubeChat.Client.Common/
-RUN dotnet restore "KubeChat.Client.Common/KubeChat.Client.Common.csproj"
-RUN dotnet build "KubeChat.Client.Common/KubeChat.Client.Common.csproj" -c Release -o /app/KubeChat.Client.Common/build
 
+COPY KubeChat.Client.Common/ KubeChat.Client.Common/
 COPY KubeChat.Client.ServerSide/ KubeChat.Client.ServerSide/
-RUN dotnet restore "KubeChat.Client.ServerSide/KubeChat.Client.ServerSide.csproj"
-RUN dotnet build "KubeChat.Client.ServerSide/KubeChat.Client.ServerSide.csproj" -c Release -o /app/KubeChat.Client.ServerSide/build
+
+RUN dotnet restore KubeChat.Client.ServerSide/KubeChat.Client.ServerSide.csproj
+RUN dotnet build KubeChat.Client.ServerSide/KubeChat.Client.ServerSide.csproj -c Release -o /app/KubeChat.Client.ServerSide/build
 
 FROM build AS publish
-RUN dotnet publish "KubeChat.Client.ServerSide/KubeChat.Client.ServerSide.csproj" -c Release -o /app/KubeChat.Client.ServerSide/publish
+RUN dotnet publish KubeChat.Client.ServerSide/KubeChat.Client.ServerSide.csproj -c Release -o /app/KubeChat.Client.ServerSide/publish
 
 FROM base AS final
 WORKDIR /app

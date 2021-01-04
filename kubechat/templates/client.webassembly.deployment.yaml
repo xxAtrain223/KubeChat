@@ -17,7 +17,6 @@ spec:
     spec:
       containers:
       - name: client
-        image: xxatrain223/kubechatclientwebassembly:0.1.2
-        imagePullPolicy: Always
+        image: xxatrain223/kubechat-client-webassembly:0.1.3
         ports:
         - containerPort: 80

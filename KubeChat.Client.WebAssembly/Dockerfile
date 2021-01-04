@@ -3,18 +3,17 @@ FROM mcr.microsoft.com/dotnet/sdk:5.0-alpine AS build
 # Setting the work directory for our app
 
 WORKDIR /src
-COPY KubeChat.Client.Common/ KubeChat.Client.Common/
-RUN dotnet restore "KubeChat.Client.Common/KubeChat.Client.Common.csproj"
-RUN dotnet build "KubeChat.Client.Common/KubeChat.Client.Common.csproj" -c Release -o /app/KubeChat.Client.Common/build
 
+COPY KubeChat.Client.Common/ KubeChat.Client.Common/
 COPY KubeChat.Client.WebAssembly/ KubeChat.Client.WebAssembly/ 
-RUN dotnet restore "KubeChat.Client.WebAssembly/KubeChat.Client.WebAssembly.csproj"
-RUN dotnet build "KubeChat.Client.WebAssembly/KubeChat.Client.WebAssembly.csproj" -c Release -o /app/KubeChat.Client.WebAssembly/build
+
+RUN dotnet restore KubeChat.Client.WebAssembly/KubeChat.Client.WebAssembly.csproj
+RUN dotnet build KubeChat.Client.WebAssembly/KubeChat.Client.WebAssembly.csproj -c Release -o /app/KubeChat.Client.WebAssembly/build
 
 # Once we're done building, we'll publish the project
 # to the publish folder 
 FROM build AS publish
-RUN dotnet publish "KubeChat.Client.WebAssembly/KubeChat.Client.WebAssembly.csproj" -c Release -o /app/KubeChat.Client.WebAssembly/publish
+RUN dotnet publish KubeChat.Client.WebAssembly/KubeChat.Client.WebAssembly.csproj -c Release -o /app/KubeChat.Client.WebAssembly/publish
 
 # We then get the base image for Nginx and set the 
 # work directory 
