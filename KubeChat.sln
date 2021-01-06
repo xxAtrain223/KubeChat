@@ -11,7 +11,7 @@ Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-co
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KubeChat.Client.Common", "KubeChat.Client.Common\KubeChat.Client.Common.csproj", "{EF3FD179-8B92-4CDD-9AE3-D9E0F67F9E5D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KubeChat.Client.WebAssembly", "KubeChat.Client.WebAssembly\KubeChat.Client.WebAssembly.csproj", "{2EFA84BF-FD03-42AF-9EDA-DD13454B3C27}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KubeChat.Client.WebAssembly", "KubeChat.Client.WebAssembly\KubeChat.Client.WebAssembly.csproj", "{2EFA84BF-FD03-42AF-9EDA-DD13454B3C27}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

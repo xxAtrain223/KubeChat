@@ -1,0 +1,43 @@
+﻿<div class="input-group mb-3">
+    <div class="input-group-prepend">
+        <span class="input-group-text">Server</span>
+    </div>
+    <input type="text" class="form-control" placeholder="@DefaultServer" disabled="@Connecting" @bind="Server" @onkeyup="InputKeyPress" />
+    <div class="input-group-append">
+        <button class="btn btn-primary" type="button" disabled="@Connecting" @onclick="Click">@(Connecting ? "Connecting" : "Connect")</button>
+    </div>
+</div>
+
+@code {
+    public string Server { get; set; }
+
+    [Parameter]
+    public string DefaultServer { get; init; }
+
+    [Parameter]
+    public EventCallback<string> onsubmit { get; set; }
+
+    [Parameter]
+    public bool Connecting { get; set; }
+
+    protected override void OnInitialized()
+    {
+        Server = DefaultServer;
+
+        base.OnInitialized();
+    }
+
+    private async Task Click()
+    {
+        await onsubmit.InvokeAsync(Server);
+    }
+
+    private async Task InputKeyPress(KeyboardEventArgs args)
+    {
+        if (!args.ShiftKey && args.Key == "Enter")
+        {
+            await onsubmit.InvokeAsync(Server);
+        }
+    }
+
+}

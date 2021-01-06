@@ -1,14 +1,7 @@
 ﻿@page "/"
 
-<Chat SiteUrl="http://server.kubechat.com" Username="@("WA-" + new Random().Next(1000).ToString("D3"))" @ref="chat"></Chat>
+<Chat DefaultSiteUrl="http://server.kubechat.com/" Username="@("WA-" + new Random().Next(1000).ToString("D3"))" />
 
 @code {
-    private Chat chat { get; set; }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        await chat.Connect();
-
-        await base.OnAfterRenderAsync(firstRender);
-    }
 }

@@ -1,12 +1,4 @@
 ﻿<div id="scrollbox">
-    @if (connecting)
-    {
-        <div class="card mb-3 text-white bg-warning">
-            <div class="card-body">
-                <h5 class="card-title mb-0">Connecting...</h5>
-            </div>
-        </div>
-    }
     @foreach (var item in messages)
     {
         <div class="card mb-3 text-white @item.CSS">
@@ -24,12 +16,14 @@
         </div>
     }
     <hr />
-    <div class="input-group">
-        <input class="form-control" @bind="newMessage" @onkeyup="InputKeyPress" />
-        <div class="input-group-append">
-            <button class="col btn btn-primary" @onclick="@SendAsync">Send</button>
-        </div>
-    </div>
+    @if (!connected)
+    {
+        <RoomPicker DefaultServer="@DefaultSiteUrl" onsubmit="Connect" Connecting="connecting" />
+    }
+    else
+    {
+        <MessageSubmitter onsubmit="SendAsync" Connected="connected && !connecting" />
+    }
 </div>
 
 @implements IDisposable
@@ -37,9 +31,6 @@
 @using System.Threading; 
 
 @code {
-    [Parameter]
-    public string SiteUrl { get; set; }
-
     [Parameter]
     public string HubPath { get; set; } = "/ChatHub";
 
@@ -49,15 +40,18 @@
     [Parameter]
     public string AccessToken { get; set; }
 
-    private List<Message> messages = new List<Message>();
+    [Parameter]
+    public string DefaultSiteUrl { get; init; }
 
-    private string newMessage;
+    private List<Message> messages = new List<Message>();
 
     private HubConnection hubConnection = null;
 
     private bool connecting = false;
 
-    public async Task Connect()
+    private bool connected { get; set; } = false;
+
+    public async Task Connect(string SiteUrl)
     {
         if (hubConnection != null)
         {
@@ -86,6 +80,8 @@
                 Body = $"Connection closed\n{e.Message}",
                 CSS = "bg-info"
             });
+            connected = false;
+            connecting = false;
             InvokeAsync(StateHasChanged);
             return Task.CompletedTask;
         };
@@ -98,6 +94,8 @@
                 Body = $"Reconnecting\n{e.Message}",
                 CSS = "bg-info"
             });
+            connected = true;
+            connecting = true;
             InvokeAsync(StateHasChanged);
             return Task.CompletedTask;
         };
@@ -110,6 +108,8 @@
                 Body = $"Reconnected\n{s}",
                 CSS = "bg-info"
             });
+            connected = true;
+            connecting = false;
             InvokeAsync(StateHasChanged);
             return Task.CompletedTask;
         };
@@ -123,6 +123,7 @@
             await hubConnection.StartAsync();
 
             connecting = false;
+            connected = true;
             StateHasChanged();
 
             await hubConnection.SendAsync("Register", Username);
@@ -165,15 +166,7 @@
         Disconnect().Wait();
     }
 
-    private async Task InputKeyPress(KeyboardEventArgs args)
-    {
-        if (!args.ShiftKey && args.Key == "Enter")
-        {
-            await SendAsync();
-        }
-    }
-
-    private async Task SendAsync()
+    private async Task SendAsync(string newMessage)
     {
         if (!string.IsNullOrWhiteSpace(newMessage))
         {
@@ -194,7 +187,12 @@
 
             if (hubConnection == null || hubConnection.State == HubConnectionState.Disconnected)
             {
-                await Connect();
+                messages.Add(new Message
+                {
+                    Username = "KubeChat",
+                    Body = $"Not connected to the server",
+                    CSS = "bg-danger"
+                });
             }
 
             if (hubConnection != null && hubConnection.State == HubConnectionState.Connected)

@@ -1,0 +1,29 @@
+﻿<div class="input-group mb-3">
+    <input class="form-control" disabled="@(!Connected)" @bind="newMessage" @onkeyup="InputKeyPress" />
+    <div class="input-group-append">
+        <button class="col btn btn-primary" disabled="@(!Connected)" @onclick="@SendAsync">Send</button>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public EventCallback<string> onsubmit { get; set; }
+
+    [Parameter]
+    public bool Connected { get; set; }
+
+    private string newMessage = "";
+
+    private async Task InputKeyPress(KeyboardEventArgs args)
+    {
+        if (!args.ShiftKey && args.Key == "Enter")
+        {
+            await onsubmit.InvokeAsync(newMessage);
+        }
+    }
+
+    protected async Task SendAsync()
+    {
+        await onsubmit.InvokeAsync(newMessage);
+    }
+}
