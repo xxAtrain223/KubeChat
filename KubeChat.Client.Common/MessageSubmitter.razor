@@ -14,16 +14,17 @@
 
     private string newMessage = "";
 
-    private async Task InputKeyPress(KeyboardEventArgs args)
-    {
-        if (!args.ShiftKey && args.Key == "Enter")
-        {
-            await onsubmit.InvokeAsync(newMessage);
-        }
-    }
-
     protected async Task SendAsync()
     {
         await onsubmit.InvokeAsync(newMessage);
+        newMessage = "";
+    }
+
+    protected async Task InputKeyPress(KeyboardEventArgs args)
+    {
+        if (!args.ShiftKey && args.Key == "Enter")
+        {
+            await SendAsync();
+        }
     }
 }

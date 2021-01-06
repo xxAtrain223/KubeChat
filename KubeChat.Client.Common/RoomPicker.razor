@@ -27,17 +27,16 @@
         base.OnInitialized();
     }
 
-    private async Task Click()
+    protected async Task Click()
     {
         await onsubmit.InvokeAsync(Server);
     }
 
-    private async Task InputKeyPress(KeyboardEventArgs args)
+    protected async Task InputKeyPress(KeyboardEventArgs args)
     {
         if (!args.ShiftKey && args.Key == "Enter")
         {
-            await onsubmit.InvokeAsync(Server);
+            await Click();
         }
     }
-
 }
