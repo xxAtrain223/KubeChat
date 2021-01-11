@@ -17,6 +17,9 @@ spec:
     spec:
       containers:
       - name: server
-        image: xxatrain223/kubechat-server:0.1.3
+        image: xxatrain223/kubechat-server:0.1.4
         ports:
         - containerPort: 80
+        env:
+        - name: KubernetesResource
+          value: Pod
