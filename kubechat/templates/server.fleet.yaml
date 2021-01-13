@@ -1,0 +1,21 @@
+apiVersion: "agones.dev/v1"
+kind: Fleet
+metadata:
+  name: server-fleet
+  namespace: kubechat
+spec:
+  replicas: 2
+  template:
+    spec:
+      ports:
+      - name: default
+        containerPort: 80
+        protocol: TCP
+      template:
+        spec:
+          containers:
+          - name: server
+            image: xxatrain223/kubechat-server:0.1.4
+            env:
+            - name: KubernetesResource
+              value: GameServer
