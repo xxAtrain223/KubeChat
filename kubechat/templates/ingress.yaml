@@ -27,14 +27,13 @@ spec:
             name: client-webassembly-service
             port:
               number: 80
-  - host: server.kubechat.com
+  - host: gateway.kubechat.com
     http:
       paths:
       - path: /
         pathType: Prefix
         backend:
           service:
-            name: server-service
+            name: gateway-service
             port:
               number: 80
-

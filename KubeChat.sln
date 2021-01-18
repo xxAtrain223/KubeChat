@@ -13,6 +13,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KubeChat.Client.Common", "K
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KubeChat.Client.WebAssembly", "KubeChat.Client.WebAssembly\KubeChat.Client.WebAssembly.csproj", "{2EFA84BF-FD03-42AF-9EDA-DD13454B3C27}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KubeChat.Gateway", "KubeChat.Gateway\KubeChat.Gateway.csproj", "{05186BA3-A79F-4FCE-89BC-72B2216A6CD4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{2EFA84BF-FD03-42AF-9EDA-DD13454B3C27}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2EFA84BF-FD03-42AF-9EDA-DD13454B3C27}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2EFA84BF-FD03-42AF-9EDA-DD13454B3C27}.Release|Any CPU.Build.0 = Release|Any CPU
+		{05186BA3-A79F-4FCE-89BC-72B2216A6CD4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{05186BA3-A79F-4FCE-89BC-72B2216A6CD4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{05186BA3-A79F-4FCE-89BC-72B2216A6CD4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{05186BA3-A79F-4FCE-89BC-72B2216A6CD4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
