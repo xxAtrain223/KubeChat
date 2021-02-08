@@ -17,6 +17,9 @@ spec:
     spec:
       containers:
       - name: gateway
-        image: xxatrain223/kubechat-gateway:0.1.0
+        image: xxatrain223/kubechat-gateway:0.1.1
         ports:
         - containerPort: 80
+        env:
+        - name: KubeChat.Agones
+          value: http://agones-service

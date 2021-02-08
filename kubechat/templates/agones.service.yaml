@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: agones-service
+  namespace: kubechat
+spec:
+  selector:
+    app: agones
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80

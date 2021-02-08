@@ -1,21 +1,3 @@
-//using k8s;
-//using k8s.Models;
-//using KubeChat.Gateway.Agones;
-//using Microsoft.AspNetCore.Builder;
-//using Microsoft.AspNetCore.Hosting;
-//using Microsoft.AspNetCore.Http;
-//using Microsoft.Extensions.Configuration;
-//using Microsoft.Extensions.DependencyInjection;
-//using Microsoft.Extensions.Hosting;
-//using Microsoft.Extensions.Logging;
-//using Newtonsoft.Json.Linq;
-//using System;
-//using System.Collections.Generic;
-//using System.Linq;
-//using System.Net;
-//using System.Net.Http;
-//using System.Threading.Tasks;
-//using Microsoft.ReverseProxy.Service.Proxy;
 using System;
 using System.Net;
 using System.Net.Http;
@@ -28,12 +10,32 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.ReverseProxy.Service.Proxy;
-using KubeChat.Gateway.Agones;
-using Microsoft.ReverseProxy.Service.RuntimeModel.Transforms;
 using System.Collections.Generic;
+using KubeChat.Gateway.Services;
+using Grpc.Net.Client;
+using Polly;
+using System.Threading;
+using Grpc.Core;
+using System.Linq;
 
 namespace KubeChat.Gateway
 {
+    public static class StatusManager
+    {
+        public static StatusCode? GetStatusCode(HttpResponseMessage response)
+        {
+            var headers = response.Headers;
+
+            if (!headers.Contains("grpc-status") && response.StatusCode == HttpStatusCode.OK)
+                return StatusCode.OK;
+
+            if (headers.Contains("grpc-status"))
+                return (StatusCode)int.Parse(headers.GetValues("grpc-status").First());
+
+            return null;
+        }
+    }
+
     public class Startup
     {
         public IConfiguration Configuration { get; }
@@ -52,42 +54,25 @@ namespace KubeChat.Gateway
         {
             services.AddHttpProxy();
 
-            if (WebHostEnvironment.IsDevelopment())
-            {
-                services.AddSingleton<IGameServerWatcher>(serviceProvider =>
+            services.AddGrpcClient<Agones.Services.Agones.AgonesClient>(o =>
                 {
-                    return new FakeGameServerWatcher(new Dictionary<string, GameServerAddress>
+                    o.Address = new Uri(Configuration.GetValue<string>("KubeChat.Agones"));
+                })
+                .ConfigurePrimaryHttpMessageHandler(() =>
+                    new SocketsHttpHandler
                     {
-                        {
-                            "test",
-                            new GameServerAddress
-                            {
-                                Name = "test",
-                                Address = "127.0.0.1",
-                                Ports = new Dictionary<string, GameServerStatusPort>
-                                {
-                                    {
-                                        "default",
-                                        new GameServerStatusPort
-                                        {
-                                            Name = "default",
-                                            Port = 5002
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                        PooledConnectionIdleTimeout = Timeout.InfiniteTimeSpan,
+                        KeepAlivePingDelay = TimeSpan.FromSeconds(60),
+                        KeepAlivePingTimeout = TimeSpan.FromSeconds(30),
+                        EnableMultipleHttp2Connections = true
                     });
-                });
-            }
-            else
-            {
-                services.AddSingleton<IGameServerWatcher, GameServerWatcher>();
-            }
+
+            services.AddSingleton<GameServerWatcher>();
+            services.AddHostedService(serviceProvider => serviceProvider.GetService<GameServerWatcher>());
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, ILogger<Startup> logger, IHttpProxy httpProxy, IGameServerWatcher gameServerWatcher, IHostApplicationLifetime hostApplicationLifetime)
+        public void Configure(IApplicationBuilder app, ILogger<Startup> logger, IHttpProxy httpProxy, GameServerWatcher gameServerWatcher)
         {
             var httpClient = new HttpMessageInvoker(new SocketsHttpHandler()
             {
@@ -97,12 +82,7 @@ namespace KubeChat.Gateway
                 UseCookies = false
             });
 
-            hostApplicationLifetime.ApplicationStarted.Register(() =>
-            {
-                logger.LogDebug("Debug Message");
-            });
-
-            var transformer = new CustomTransformer();
+            var transformer = new RemoveServerParametersTransformer();
             var requestOptions = new RequestProxyOptions(TimeSpan.FromSeconds(100), null);
 
             app.UseRouting();
@@ -115,7 +95,7 @@ namespace KubeChat.Gateway
                     var slug = httpContext.Request.RouteValues["slug"]?.ToString();
                     var rawQueryString = httpContext.Request.QueryString;
 
-                    if (!gameServerWatcher.GameServerAddresses.TryGetValue(serverName, out GameServerAddress server))
+                    if (!gameServerWatcher.GameServerAddresses.TryGetValue(serverName, out var server))
                     {
                         var errorMessage = $"Server '{serverName}' not found";
                         logger.LogWarning(errorMessage);
@@ -124,7 +104,7 @@ namespace KubeChat.Gateway
                         return;
                     }
 
-                    if (!server.Ports.TryGetValue(portName, out GameServerStatusPort port))
+                    if (!server.Ports.TryGetValue(portName, out var port))
                     {
                         var errorMessage = $"Port '{portName}' for Server '{serverName}' not found";
                         logger.LogWarning(errorMessage);
@@ -134,10 +114,9 @@ namespace KubeChat.Gateway
                     }
 
                     string sourceUri = $"{httpContext.Request.Scheme}://{httpContext.Request.Host}{httpContext.Request.Path}{httpContext.Request.QueryString}";
-                    //string redirectUri = $"{httpContext.Request.Scheme}://{server.Address}:{port.Port}/{slug}{httpContext.Request.QueryString}";
-                    string redirectUri = $"{httpContext.Request.Scheme}://{server.Address}:{port.Port}/";
+                    string redirectUri = $"{httpContext.Request.Scheme}://{server.Address}:{port.Number}/";
 
-                    logger.LogDebug($"Redirected {sourceUri} => {redirectUri}{slug}{httpContext.Request.QueryString}");
+                    logger.LogInformation($"Redirected client {httpContext.Connection.RemoteIpAddress} from {sourceUri} to {redirectUri}{slug}{httpContext.Request.QueryString}");
 
                     await httpProxy.ProxyAsync(httpContext, redirectUri, httpClient, requestOptions, transformer);
                     var errorFeature = httpContext.Features.Get<IProxyErrorFeature>();
@@ -149,7 +128,7 @@ namespace KubeChat.Gateway
             });
         }
 
-        private class CustomTransformer : HttpTransformer
+        private class RemoveServerParametersTransformer : HttpTransformer
         {
             public override async Task TransformRequestAsync(HttpContext httpContext, HttpRequestMessage proxyRequest, string destinationPrefix)
             {

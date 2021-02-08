@@ -1,22 +1,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: client-serverside-deployment
+  name: agones-deployment
   namespace: kubechat
   labels:
-    app: client-serverside
+    app: agones
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: client-serverside
+      app: agones
   template:
     metadata:
       labels:
-        app: client-serverside
+        app: agones
     spec:
       containers:
-      - name: client
-        image: xxatrain223/kubechat-client-serverside:0.1.5
+      - name: agones
+        image: xxatrain223/kubechat-agones:0.1.0
         ports:
         - containerPort: 80

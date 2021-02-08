@@ -100,7 +100,7 @@
             return Task.CompletedTask;
         };
 
-        hubConnection.Reconnected += (string s) =>
+        hubConnection.Reconnected += async (string s) =>
         {
             messages.Add(new Message
             {
@@ -110,8 +110,8 @@
             });
             connected = true;
             connecting = false;
-            InvokeAsync(StateHasChanged);
-            return Task.CompletedTask;
+            await InvokeAsync(StateHasChanged);
+            await hubConnection.SendAsync("Register", Username);
         };
 
         try

@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+
+option csharp_namespace = "KubeChat.Agones.Services";
+
+service Agones {
+	rpc GetGameServers (google.protobuf.Empty) returns (stream GameServerChange);
+}
+
+message GameServerChange {
+	enum ChangeType {
+		Added = 0;
+		Removed = 1;
+	}
+	ChangeType Change = 1;
+
+	message GameServerAddress {
+		message Port {
+			string Name = 1;
+			int32 Number = 2;
+		}
+
+		string Name = 1;
+		string Address = 2;
+		map<string, Port> Ports = 3;
+	}
+	GameServerAddress GameServer = 2;
+}

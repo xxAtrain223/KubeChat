@@ -17,6 +17,6 @@ spec:
     spec:
       containers:
       - name: client
-        image: xxatrain223/kubechat-client-webassembly:0.1.4
+        image: xxatrain223/kubechat-client-webassembly:0.1.5
         ports:
         - containerPort: 80

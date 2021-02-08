@@ -107,14 +107,23 @@ namespace KubeChat.Server
 
             app.UseCors(builder =>
             {
-                builder.WithOrigins("http://serverside.client.kubechat.com")
-                    .AllowAnyHeader()
-                    .WithMethods("GET", "POST")
-                    .AllowCredentials();
-                builder.WithOrigins("http://webassembly.client.kubechat.com")
-                    .AllowAnyHeader()
-                    .WithMethods("GET", "POST")
-                    .AllowCredentials();
+                if (env.IsDevelopment())
+                {
+                    builder.AllowAnyOrigin()
+                        .AllowAnyHeader()
+                        .WithMethods("GET", "POST");
+                }
+                else
+                {
+                    builder.WithOrigins("http://serverside.client.kubechat.com")
+                        .AllowAnyHeader()
+                        .WithMethods("GET", "POST")
+                        .AllowCredentials();
+                    builder.WithOrigins("http://webassembly.client.kubechat.com")
+                        .AllowAnyHeader()
+                        .WithMethods("GET", "POST")
+                        .AllowCredentials();
+                }
             });
 
             app.UseStaticFiles();
