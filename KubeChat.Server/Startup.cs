@@ -74,8 +74,6 @@ namespace KubeChat.Server
                 {
                     var agones = app.ApplicationServices.GetRequiredService<AgonesSDK>();
 
-                    logger.LogDebug($"Agones is {(agones != null ? "not" : "")} null");
-
                     // Alert Agones that this server is ready once the application has finished starting
                     await agones.ReadyAsync();
 
@@ -134,7 +132,6 @@ namespace KubeChat.Server
 
             app.UseEndpoints(endpoints =>
             {
-                //endpoints.MapRazorPages();
                 endpoints.MapHub<Hubs.ChatHub>("/ChatHub");
             });
         }

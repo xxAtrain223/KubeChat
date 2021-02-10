@@ -14,45 +14,6 @@ using KubeChat.Agones.Services;
 
 namespace KubeChat.Agones
 {
-    public static class IServiceCollectionExtensions
-    {
-        public static IServiceCollection AddGameServerWatcher(this IServiceCollection services, IWebHostEnvironment env)
-        {
-            if (env.IsDevelopment())
-            {
-                return services.AddSingleton<IGameServerWatcher>(serviceProvider =>
-                {
-                    var gameServerStatusPort = new GameServerStatusPort
-                    {
-                        Name = "default",
-                        Number = 5000
-                    };
-
-                    var gameServerStatusPorts = new Dictionary<string, GameServerStatusPort>
-                    {
-                        { gameServerStatusPort.Name, gameServerStatusPort }
-                    };
-
-                    var gameServerAddress = new GameServerAddress
-                    {
-                        Name = "test",
-                        Address = "127.0.0.1",
-                        Ports = gameServerStatusPorts
-                    };
-
-                    var gameServerAddresses = new ConcurrentDictionary<string, GameServerAddress>();
-                    _ = gameServerAddresses.TryAdd(gameServerAddress.Name, gameServerAddress);
-
-                    return new FakeGameServerWatcher(gameServerAddresses);
-                });
-            }
-            else
-            {
-                return services.AddSingleton<IGameServerWatcher, GameServerWatcher>();
-            }
-        }
-    }
-
     public class Startup
     {
         public IConfiguration Configuration { get; }
