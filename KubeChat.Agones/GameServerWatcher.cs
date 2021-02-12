@@ -68,7 +68,7 @@ namespace KubeChat.Agones.Kubernetes
 
         private void ConnectToKubernetes()
         {
-            _watcher = _kubernetesClient.ListNamespacedCustomObjectWithHttpMessagesAsync("agones.dev", "v1", "kubechat", "gameservers", watch: true);
+            _watcher = _kubernetesClient.ListClusterCustomObjectWithHttpMessagesAsync("agones.dev", "v1", "gameservers", watch: true);
             _watcher.Watch(
                 (Action<WatchEventType, object>)((watchEvent, resourceObject) =>
                 {

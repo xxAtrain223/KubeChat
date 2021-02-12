@@ -6,6 +6,8 @@ option csharp_namespace = "KubeChat.Agones.Services";
 
 service Agones {
 	rpc GetGameServers (google.protobuf.Empty) returns (stream GameServerChange);
+	rpc AllocateGameServer (AllocateGameServerRequest) returns (AllocateGameServerResponse);
+	rpc DeleteGameServer (DeleteGameServerRequest) returns (google.protobuf.Empty);
 }
 
 message GameServerChange {
@@ -26,4 +28,16 @@ message GameServerChange {
 		map<string, Port> Ports = 3;
 	}
 	GameServerAddress GameServer = 2;
+}
+
+message AllocateGameServerRequest {
+	string RequestedName = 1;
+}
+
+message AllocateGameServerResponse {
+	string GameServerName = 1;
+}
+
+message DeleteGameServerRequest {
+	string GameServerName = 1;
 }

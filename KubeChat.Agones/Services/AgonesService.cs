@@ -1,6 +1,7 @@
 ﻿using Google.Protobuf.Collections;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
+using k8s;
 using KubeChat.Agones.Kubernetes;
 using System;
 using System.Collections.Generic;
@@ -71,6 +72,50 @@ namespace KubeChat.Agones.Services
             }
 
             return gameServerAddr;
+        }
+
+        public override async Task<AllocateGameServerResponse> AllocateGameServer(AllocateGameServerRequest request, ServerCallContext context)
+        {
+            var kubernetesConfig = KubernetesClientConfiguration.InClusterConfig();
+            var kubernetesClient = new k8s.Kubernetes(kubernetesConfig);
+
+            var allocation = new GameServerAllocation
+            {
+                Spec = new GameServerAllocationSpec
+                {
+                    Required = new k8s.Models.V1LabelSelector
+                    {
+                        MatchLabels = new Dictionary<string, string>
+                        {
+                            { "agones.dev/fleet", "server-fleet" }
+                        }
+                    }
+                }
+            };
+
+            allocation = await kubernetesClient.CreateClusterCustomObjectAsync(allocation, "allocation.agones.dev", "v1", "gameserverallocations") as GameServerAllocation;
+
+            if (allocation.Status.State == GameServerAllocationState.Allocated)
+            {
+                return new AllocateGameServerResponse
+                {
+                    GameServerName = allocation.Status.GameServerName
+                };
+            }
+            else
+            {
+                throw new RpcException(new Status(StatusCode.ResourceExhausted, $"Error allocating GameServer, State: {allocation.Status.State}"));
+            }
+        }
+
+        public override async Task<Empty> DeleteGameServer(DeleteGameServerRequest request, ServerCallContext context)
+        {
+            var kubernetesConfig = KubernetesClientConfiguration.InClusterConfig();
+            var kubernetesClient = new k8s.Kubernetes(kubernetesConfig);
+
+            await kubernetesClient.DeleteClusterCustomObjectAsync("agones.dev", "v1", "gameservers", request.GameServerName);
+
+            return new Empty();
         }
     }
 }

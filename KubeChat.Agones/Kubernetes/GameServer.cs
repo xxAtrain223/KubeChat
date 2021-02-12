@@ -8,10 +8,10 @@ namespace KubeChat.Agones.Kubernetes
     public class GameServer : IKubernetesObject<V1ObjectMeta>, ISpec<GameServerSpec>
     {
         [JsonProperty(PropertyName = "apiVersion")]
-        public string ApiVersion { get; set; }
+        public string ApiVersion { get; set; } = "agones.dev/v1";
 
         [JsonProperty(PropertyName = "kind")]
-        public string Kind { get; set; }
+        public string Kind { get; set; } = "GameServer";
 
         [JsonProperty(PropertyName = "metadata")]
         public V1ObjectMeta Metadata { get; set; }

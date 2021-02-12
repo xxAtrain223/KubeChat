@@ -1,0 +1,11 @@
+apiVersion: "autoscaling.agones.dev/v1"
+kind: FleetAutoscaler
+metadata:
+  name: server-fleet-autoscaler
+spec:
+  fleetName: server-fleet
+  policy:
+    type: Buffer
+    buffer:
+      bufferSize: 2
+      maxReplicas: 10

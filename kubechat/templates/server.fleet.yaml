@@ -4,7 +4,7 @@ metadata:
   name: server-fleet
   namespace: kubechat
 spec:
-  replicas: 2
+  replicas: 0
   template:
     spec:
       ports:
