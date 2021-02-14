@@ -11,12 +11,12 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.ReverseProxy.Service.Proxy;
 using System.Collections.Generic;
-using KubeChat.Gateway.Services;
 using Grpc.Net.Client;
 using Polly;
 using System.Threading;
 using Grpc.Core;
 using System.Linq;
+using KubeChat.Agones.Services;
 
 namespace KubeChat.Gateway
 {
@@ -38,25 +38,12 @@ namespace KubeChat.Gateway
         {
             services.AddHttpProxy();
 
-            services.AddGrpcClient<Agones.Services.Agones.AgonesClient>(o =>
-                {
-                    o.Address = new Uri(Configuration.GetValue<string>("KubeChat.Agones"));
-                })
-                .ConfigurePrimaryHttpMessageHandler(() =>
-                    new SocketsHttpHandler
-                    {
-                        PooledConnectionIdleTimeout = Timeout.InfiniteTimeSpan,
-                        KeepAlivePingDelay = TimeSpan.FromSeconds(60),
-                        KeepAlivePingTimeout = TimeSpan.FromSeconds(30),
-                        EnableMultipleHttp2Connections = true
-                    });
-
-            services.AddSingleton<GameServerWatcher>();
-            services.AddHostedService(serviceProvider => serviceProvider.GetService<GameServerWatcher>());
+            services.AddAgonesGrpcClient(Configuration.GetValue<string>("KubeChat.Agones"))
+                .AddGameServerWatcher();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, ILogger<Startup> logger, IHttpProxy httpProxy, GameServerWatcher gameServerWatcher)
+        public void Configure(IApplicationBuilder app, ILogger<Startup> logger, IHttpProxy httpProxy, GameServerServices gameServerWatcher)
         {
             var httpClient = new HttpMessageInvoker(new SocketsHttpHandler()
             {

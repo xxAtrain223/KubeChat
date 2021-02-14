@@ -9,7 +9,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace KubeChat.Agones.Services
+namespace KubeChat.Agones
 {
     public class AgonesService : Agones.AgonesBase
     {
@@ -24,22 +24,22 @@ namespace KubeChat.Agones.Services
         {
             var requestId = Guid.NewGuid();
 
-            void gameServerAdded(GameServerAddress gameServerAddress)
+            void gameServerAdded(K8sGameServerAddress gameServerAddress)
             {
                 var change = new GameServerChange
                 {
                     Change = GameServerChange.Types.ChangeType.Added,
-                    GameServer = K8sToGRPC(gameServerAddress)
+                    GameServer = K8sToGrpc(gameServerAddress)
                 };
                 responseStream.WriteAsync(change);
             }
 
-            void gameServerRemoved(GameServerAddress gameServerAddress)
+            void gameServerRemoved(K8sGameServerAddress gameServerAddress)
             {
                 var change = new GameServerChange
                 {
                     Change = GameServerChange.Types.ChangeType.Removed,
-                    GameServer = K8sToGRPC(gameServerAddress)
+                    GameServer = K8sToGrpc(gameServerAddress)
                 };
                 responseStream.WriteAsync(change);
             }
@@ -54,9 +54,9 @@ namespace KubeChat.Agones.Services
             return Task.CompletedTask;
         }
 
-        private static GameServerChange.Types.GameServerAddress K8sToGRPC(GameServerAddress gameServerAddress)
+        private static GameServerAddress K8sToGrpc(K8sGameServerAddress gameServerAddress)
         {
-            var gameServerAddr = new GameServerChange.Types.GameServerAddress
+            var gameServerAddr = new GameServerAddress
             {
                 Name = gameServerAddress.Name,
                 Address = gameServerAddress.Address
@@ -64,7 +64,7 @@ namespace KubeChat.Agones.Services
 
             foreach (var port in gameServerAddress.Ports.Values)
             {
-                gameServerAddr.Ports.Add(port.Name, new GameServerChange.Types.GameServerAddress.Types.Port
+                gameServerAddr.Ports.Add(port.Name, new GameServerAddress.Types.Port
                 {
                     Name = port.Name,
                     Number = port.Number
@@ -74,7 +74,7 @@ namespace KubeChat.Agones.Services
             return gameServerAddr;
         }
 
-        public override async Task<AllocateGameServerResponse> AllocateGameServer(AllocateGameServerRequest request, ServerCallContext context)
+        public override async Task<GameServerAddress> AllocateGameServer(AllocateGameServerRequest request, ServerCallContext context)
         {
             var kubernetesConfig = KubernetesClientConfiguration.InClusterConfig();
             var kubernetesClient = new k8s.Kubernetes(kubernetesConfig);
@@ -97,10 +97,22 @@ namespace KubeChat.Agones.Services
 
             if (allocation.Status.State == GameServerAllocationState.Allocated)
             {
-                return new AllocateGameServerResponse
+                var gameServerAddress = new GameServerAddress
                 {
-                    GameServerName = allocation.Status.GameServerName
+                    Name = allocation.Status.GameServerName,
+                    Address = allocation.Status.Address
                 };
+
+                foreach (var port in allocation.Status.Ports)
+                {
+                    gameServerAddress.Ports.Add(port.Name, new GameServerAddress.Types.Port
+                    {
+                        Name = port.Name,
+                        Number = port.Number
+                    });
+                }
+
+                return gameServerAddress;
             }
             else
             {

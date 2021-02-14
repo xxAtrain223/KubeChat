@@ -11,8 +11,9 @@ EXPOSE 80
 FROM mcr.microsoft.com/dotnet/sdk:5.0-buster-slim AS build
 WORKDIR /src
 
+COPY KubeChat.Agones/Protos/ KubeChat.Agones/Protos/
+COPY KubeChat.Agones.Sdk/ KubeChat.Agones.Sdk/
 COPY KubeChat.Gateway/ KubeChat.Gateway/
-COPY KubeChat.Agones/Protos/ KubeChat.Agones/Protos
 
 RUN dotnet restore KubeChat.Gateway/KubeChat.Gateway.csproj
 RUN dotnet build KubeChat.Gateway/KubeChat.Gateway.csproj -c Release -o /app/KubeChat.Gateway/build

@@ -1,32 +1,48 @@
 ﻿using Grpc.Core;
-using Grpc.Net.Client;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace KubeChat.Gateway.Services
+namespace KubeChat.Agones.Services
 {
-    public class GameServerWatcher : IHostedService
+    public class GameServerServices : IHostedService
     {
-        private readonly Dictionary<string, GameServerAddress> _gameServerAddresses;
-        public IReadOnlyDictionary<string, GameServerAddress> GameServerAddresses => _gameServerAddresses;
         private readonly CancellationTokenSource CancellationTokenSource;
-        private readonly Agones.Services.Agones.AgonesClient _client;
-        private readonly ILogger<GameServerWatcher> _logger;
+        private readonly Agones.AgonesClient _client;
+        private readonly ILogger<GameServerServices> _logger;
+        private readonly Dictionary<string, K8sGameServerAddress> _gameServerAddresses;
+        public IReadOnlyDictionary<string, K8sGameServerAddress> GameServerAddresses => _gameServerAddresses;
 
-        public GameServerWatcher(Agones.Services.Agones.AgonesClient client, ILogger<GameServerWatcher> logger)
+        public GameServerServices(Agones.AgonesClient client, ILogger<GameServerServices> logger)
         {
             _client = client;
             _logger = logger;
-            _gameServerAddresses = new Dictionary<string, GameServerAddress>();
+            _gameServerAddresses = new Dictionary<string, K8sGameServerAddress>();
 
             CancellationTokenSource = new CancellationTokenSource();
+        }
+
+        public async Task<K8sGameServerAddress> AllocateGameServer(string requestedName)
+        {
+            var response = await _client.AllocateGameServerAsync(new AllocateGameServerRequest
+            {
+                RequestedName = requestedName
+            });
+
+            return GrpcToK8s(response);
+        }
+
+        public async Task DeleteGameServer(string gameServerName)
+        {
+            _ = await _client.DeleteGameServerAsync(new DeleteGameServerRequest
+            {
+                GameServerName = gameServerName
+            });
         }
 
         private async Task ConnectAsync(CancellationToken cancellationToken)
@@ -40,13 +56,13 @@ namespace KubeChat.Gateway.Services
 
                 await foreach (var gameServerChange in gameServerReply.ResponseStream.ReadAllAsync(cancellationToken))
                 {
-                    if (gameServerChange.Change == Agones.Services.GameServerChange.Types.ChangeType.Added)
+                    if (gameServerChange.Change == GameServerChange.Types.ChangeType.Added)
                     {
-                        GameServerAddress gameServerAddr = GRPCToK8s(gameServerChange.GameServer);
+                        K8sGameServerAddress gameServerAddr = GrpcToK8s(gameServerChange.GameServer);
 
                         _gameServerAddresses.TryAdd(gameServerAddr.Name, gameServerAddr);
                     }
-                    else if (gameServerChange.Change == Agones.Services.GameServerChange.Types.ChangeType.Removed)
+                    else if (gameServerChange.Change == GameServerChange.Types.ChangeType.Removed)
                     {
                         _gameServerAddresses.Remove(gameServerChange.GameServer.Name);
                     }
@@ -58,9 +74,9 @@ namespace KubeChat.Gateway.Services
             }
         }
 
-        private static GameServerAddress GRPCToK8s(Agones.Services.GameServerChange.Types.GameServerAddress gameServerAddress)
+        private static K8sGameServerAddress GrpcToK8s(GameServerAddress gameServerAddress)
         {
-            return new GameServerAddress
+            return new K8sGameServerAddress
             {
                 Name = gameServerAddress.Name,
                 Address = gameServerAddress.Address,
@@ -96,18 +112,5 @@ namespace KubeChat.Gateway.Services
 
             return Task.CompletedTask;
         }
-    }
-
-    public class GameServerAddress
-    {
-        public string Name { get; set; }
-        public string Address { get; set; }
-        public IDictionary<string, GameServerPort> Ports { get; set; }
-    }
-
-    public class GameServerPort
-    {
-        public string Name { get; set; }
-        public int Number { get; set; }
     }
 }

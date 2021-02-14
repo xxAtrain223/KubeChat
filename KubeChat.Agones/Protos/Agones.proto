@@ -2,12 +2,23 @@ syntax = "proto3";
 
 import "google/protobuf/empty.proto";
 
-option csharp_namespace = "KubeChat.Agones.Services";
+option csharp_namespace = "KubeChat.Agones";
 
 service Agones {
 	rpc GetGameServers (google.protobuf.Empty) returns (stream GameServerChange);
-	rpc AllocateGameServer (AllocateGameServerRequest) returns (AllocateGameServerResponse);
+	rpc AllocateGameServer (AllocateGameServerRequest) returns (GameServerAddress);
 	rpc DeleteGameServer (DeleteGameServerRequest) returns (google.protobuf.Empty);
+}
+
+message GameServerAddress {
+	message Port {
+		string Name = 1;
+		int32 Number = 2;
+	}
+
+	string Name = 1;
+	string Address = 2;
+	map<string, Port> Ports = 3;
 }
 
 message GameServerChange {
@@ -17,16 +28,7 @@ message GameServerChange {
 	}
 	ChangeType Change = 1;
 
-	message GameServerAddress {
-		message Port {
-			string Name = 1;
-			int32 Number = 2;
-		}
-
-		string Name = 1;
-		string Address = 2;
-		map<string, Port> Ports = 3;
-	}
+	
 	GameServerAddress GameServer = 2;
 }
 
@@ -34,9 +36,6 @@ message AllocateGameServerRequest {
 	string RequestedName = 1;
 }
 
-message AllocateGameServerResponse {
-	string GameServerName = 1;
-}
 
 message DeleteGameServerRequest {
 	string GameServerName = 1;

@@ -11,20 +11,20 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace KubeChat.Agones.Kubernetes
+namespace KubeChat.Agones
 {
     public interface IGameServerWatcher
     {
-        public void Register(Guid requestId, Action<GameServerAddress> gameServerAdded, Action<GameServerAddress> gameServerRemoved);
+        public void Register(Guid requestId, Action<K8sGameServerAddress> gameServerAdded, Action<K8sGameServerAddress> gameServerRemoved);
         public void Unregister(Guid requestId);
     }
 
     public class GameServerWatcherBase : IGameServerWatcher
     {
         protected ConcurrentDictionary<Guid, GetGameServerRequest> Requests = new ConcurrentDictionary<Guid, GetGameServerRequest>();
-        protected ConcurrentDictionary<string, GameServerAddress> GameServerAddresses = new ConcurrentDictionary<string, GameServerAddress>();
+        protected ConcurrentDictionary<string, K8sGameServerAddress> GameServerAddresses = new ConcurrentDictionary<string, K8sGameServerAddress>();
 
-        public void Register(Guid requestId, Action<GameServerAddress> gameServerAdded, Action<GameServerAddress> gameServerRemoved)
+        public void Register(Guid requestId, Action<K8sGameServerAddress> gameServerAdded, Action<K8sGameServerAddress> gameServerRemoved)
         {
             var newRequest = new GetGameServerRequest
             {
@@ -98,7 +98,7 @@ namespace KubeChat.Agones.Kubernetes
 
         private void AddGameServer(GameServer server)
         {
-            var newGameServer = new GameServerAddress
+            var newGameServer = new K8sGameServerAddress
             {
                 Name = server.Metadata.Name,
                 Address = server.Status.Address,
@@ -132,11 +132,11 @@ namespace KubeChat.Agones.Kubernetes
 
     public class FakeGameServerWatcher : GameServerWatcherBase
     {
-        public FakeGameServerWatcher(ConcurrentDictionary<string, GameServerAddress> gameServerAddresses) =>
+        public FakeGameServerWatcher(ConcurrentDictionary<string, K8sGameServerAddress> gameServerAddresses) =>
             GameServerAddresses = gameServerAddresses;
     }
 
-    public class GameServerAddress
+    public class K8sGameServerAddress
     {
         public string Name { get; set; }
 
@@ -148,8 +148,8 @@ namespace KubeChat.Agones.Kubernetes
     public class GetGameServerRequest
     {
         public Guid RequestId { get; set; }
-        public Action<GameServerAddress> GameServerAdded { get; set; }
-        public Action<GameServerAddress> GameServerRemoved { get; set; }
+        public Action<K8sGameServerAddress> GameServerAdded { get; set; }
+        public Action<K8sGameServerAddress> GameServerRemoved { get; set; }
     }
 
     public static class IServiceCollectionExtensions
@@ -171,14 +171,14 @@ namespace KubeChat.Agones.Kubernetes
                         { gameServerStatusPort.Name, gameServerStatusPort }
                     };
 
-                    var gameServerAddress = new GameServerAddress
+                    var gameServerAddress = new K8sGameServerAddress
                     {
                         Name = "test",
                         Address = "127.0.0.1",
                         Ports = gameServerStatusPorts
                     };
 
-                    var gameServerAddresses = new ConcurrentDictionary<string, GameServerAddress>();
+                    var gameServerAddresses = new ConcurrentDictionary<string, K8sGameServerAddress>();
                     _ = gameServerAddresses.TryAdd(gameServerAddress.Name, gameServerAddress);
 
                     return new FakeGameServerWatcher(gameServerAddresses);
